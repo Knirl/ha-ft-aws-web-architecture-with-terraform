@@ -23,9 +23,7 @@ A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS
 
 Unchanged from Project 1:
 
-```
 ![Architecture Diagram](./project1-architecture-diagram.png)
-```
 
 Security model, also unchanged: `Internet → alb-sg (0.0.0.0/0:80) → ec2-sg (from alb-sg only:80) → rds-sg (from ec2-sg only:3306)`.
 
