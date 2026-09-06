@@ -24,27 +24,7 @@ A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS
 Unchanged from Project 1:
 
 ```
-                              Internet
-                                 │
-                        ┌────────▼────────┐
-                        │  Application     │
-                        │  Load Balancer   │  (public subnets, 2 AZs)
-                        └───┬─────────┬────┘
-                            │         │
-                ┌───────────▼──┐  ┌───▼───────────┐
-                │  EC2 (AZ-1)   │  │  EC2 (AZ-2)   │  (private subnets,
-                │  Auto Scaling │  │  Auto Scaling │   Auto Scaling Group)
-                └───────┬───────┘  └───────┬───────┘
-                        │                  │
-                        └────────┬─────────┘
-                                 │
-                        ┌────────▼────────┐
-                        │   RDS MySQL      │
-                        │   Multi-AZ       │  (private subnets,
-                        │  Primary/Standby │   automatic failover)
-                        └──────────────────┘
-
-        S3 (static assets)         CloudWatch (dashboard + alarms)
+![Architecture Diagram](./project1-architecture-diagram.png)
 ```
 
 Security model, also unchanged: `Internet → alb-sg (0.0.0.0/0:80) → ec2-sg (from alb-sg only:80) → rds-sg (from ec2-sg only:3306)`.
@@ -115,11 +95,9 @@ Same manual verification process as Project 1 — Terraform provisions infrastru
 
 Issues that only came up because this was built in Terraform (see Project 1's README for the original Console-build issues, which don't repeat here):
 
-**1. Deprecated `dynamodb_table` backend parameter**
+Deprecated `dynamodb_table` backend parameter**
 Terraform flagged `dynamodb_table` as deprecated in favor of `use_lockfile = true`, which uses S3's native conditional-write locking instead of a separate DynamoDB table. Migrated with `terraform init -reconfigure`, since only the locking mechanism changed, not the state's actual location.
 
-**2. `Module not installed` / `Reference to undeclared resource` during a module refactor**
-While experimenting with restructuring into a root-module-calling-a-child-module layout, `terraform init` had to be re-run to register the new module reference, and the root's `outputs.tf` needed updating to reference `module.<name>.<output>` rather than a resource directly — root has no visibility into a child module's internal resource names.
 
 ## Cost Considerations
 
