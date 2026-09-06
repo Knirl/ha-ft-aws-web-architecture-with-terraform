@@ -1,6 +1,6 @@
 # Highly Available AWS Web Architecture — Terraform Edition
 
-A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS Web Architecture]([../project1-repo-link](https://github.com/Knirl/aws-ha-fault-tolerant-architecture.git)) — same infrastructure, same design goals, this time provisioned entirely as code instead of built manually through the AWS Console.
+A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS Web Architecture](https://github.com/Knirl/aws-ha-fault-tolerant-architecture.git) — same infrastructure, same design goals, this time provisioned entirely as code instead of built manually through the AWS Console.
 
 **Project 1 summary, for context:** a VPC spanning 2 Availability Zones, an Application Load Balancer distributing traffic to an Auto Scaling Group of EC2 instances (private subnets), a self-healing Multi-AZ RDS MySQL database, an S3 bucket, and CloudWatch dashboards/alarms wired to SNS — built and manually verified to survive instance failure, security group misconfiguration, and AZ-level database failover. Full architecture rationale, the "why these services" comparisons, and the original testing/troubleshooting log live in that repo's README — this document focuses on what changed by rebuilding it in Terraform.
 
