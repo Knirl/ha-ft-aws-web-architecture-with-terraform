@@ -143,8 +143,6 @@ Everything below is a list of improvements for this project to level up, next pr
 - **KMS & Secrets Management** — Use a Customer Managed Key (`aws_kms_key`) for RDS/Secrets Manager and set `recovery_window_in_days = 0` on dev secrets for fast test teardowns.
 - **Code hygiene** — Run `terraform fmt -recursive` and `terraform validate` prior to every commit.
 
-**Strong nice-to-have:**
+**Nice-to-have:**
 - **Local security scanning** — Run `tfsec` or `checkov` locally before committing and document findings in the README.
-
-**Optional stretch:**
 - **Functional S3 integration** — Attach an IAM Instance Profile to EC2 so User Data dynamically fetches app assets (`aws s3 cp`) from the private S3 bucket on boot.
