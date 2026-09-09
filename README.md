@@ -7,7 +7,7 @@ A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS
 ## Table of Contents
 
 - [Architecture](#architecture)
-- [What this project intentionally does NOT include yet](#what-this-project-does-not-include-yet)
+- [What this project intentionally does NOT include yet](#what-this-project-intentionally-does-not-include-yet)
 - [What Changed, Building This in Terraform](#what-changed-building-this-in-terraform)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
