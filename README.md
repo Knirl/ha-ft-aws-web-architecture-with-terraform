@@ -37,15 +37,15 @@ Before the step-by-step summary, it's important to be explicit about this: **v1 
 
 The final architecture is identical to the Console build, but implementing it as code forced me to explicitly architect every layer:
 
-**The Console hides structural complexity.** Project 1's networking layer was created via the "VPC and more" wizard in a single guided flow. Terraform has no equivalent shortcut—the VPC, 4 subnets, Internet Gateway, NAT Gateway, Elastic IP, 2 route tables, and their associations all had to be declared as 10+ individual resources. Rebuilding it as code clarified every lower-level routing and gateway component the wizard abstracts away.
+* **The Console hides structural complexity.** Project 1's networking layer was created via the "VPC and more" wizard in a single guided flow. Terraform has no equivalent shortcut—the VPC, 4 subnets, Internet Gateway, NAT Gateway, Elastic IP, 2 route tables, and their associations all had to be declared as 10+ individual resources. Rebuilding it as code clarified every lower-level routing and gateway component the wizard abstracts away.
 
-**Dependency ordering becomes explicit, not assumed.** In the Console, user interface flow implicitly enforces step ordering (you cannot attach a route table to a subnet before the subnet exists). In Terraform, resource references (e.g., a security group rule referencing another security group's ID) dynamically build an implicit dependency graph. Where no direct resource attribute reference exists but provision ordering is mandatory—such as forcing the Internet Gateway to deploy before the NAT Gateway—`depends_on` must be explicitly declared.
+* **Dependency ordering becomes explicit, not assumed.** In the Console, user interface flow implicitly enforces step ordering (you cannot attach a route table to a subnet before the subnet exists). In Terraform, resource references (e.g., a security group rule referencing another security group's ID) dynamically build an implicit dependency graph. Where no direct resource attribute reference exists but provision ordering is mandatory—such as forcing the Internet Gateway to deploy before the NAT Gateway—`depends_on` must be explicitly declared.
 
-**Secrets management becomes an intentional design pattern.** While the AWS Console can auto-generate credentials behind a single checkbox, writing the workflow in Terraform required deliberate architectural choices: generating credentials dynamically via `random_password`, committing them to AWS Secrets Manager, and referencing them directly inside the RDS resource block. This ensures sensitive credentials never exist in plain text within version control (though access controls must be enforced on the state file where state metadata resides).
+* **Secrets management becomes an intentional design pattern.** While the AWS Console can auto-generate credentials behind a single checkbox, writing the workflow in Terraform required deliberate architectural choices: generating credentials dynamically via `random_password`, committing them to AWS Secrets Manager, and referencing them directly inside the RDS resource block. This ensures sensitive credentials never exist in plain text within version control (though access controls must be enforced on the state file where state metadata resides).
 
-**State introduces a dedicated operational layer.** Unlike Console builds, Terraform relies on a state engine to map declared code to real-world AWS resource IDs. This introduced a foundational bootstrap step—provisioning an encrypted S3 bucket for remote state before the primary stack could initialize—solving the circular dependency of requiring infrastructure to store state.
+* **State introduces a dedicated operational layer.** Unlike Console builds, Terraform relies on a state engine to map declared code to real-world AWS resource IDs. This introduced a foundational bootstrap step—provisioning an encrypted S3 bucket for remote state before the primary stack could initialize—solving the circular dependency of requiring infrastructure to store state.
 
-**Infrastructure reproducibility is mathematically enforced.** The entire multi-tier stack—NAT Gateway, ALB, Multi-AZ RDS, and scaling policies—was torn down and recreated from scratch across testing cycles via `terraform apply` and `terraform destroy`. This eliminated configuration drift and avoided manually repeating dozens of UI steps.
+* **Infrastructure reproducibility is mathematically enforced.** The entire multi-tier stack—NAT Gateway, ALB, Multi-AZ RDS, and scaling policies—was torn down and recreated from scratch across testing cycles via `terraform apply` and `terraform destroy`. This eliminated configuration drift and avoided manually repeating dozens of UI steps.
 
 ## Prerequisites
 
@@ -99,8 +99,9 @@ Same manual verification process as Project 1 — Terraform provisions infrastru
 
 Issues that only came up because this was built in Terraform (see Project 1's README for the original Console-build issues, which don't repeat here):
 
-Deprecated `dynamodb_table` backend parameter**
-Terraform flagged `dynamodb_table` as deprecated in favor of `use_lockfile = true`, which uses S3's native conditional-write locking instead of a separate DynamoDB table. Migrated with `terraform init -reconfigure`, since only the locking mechanism changed, not the state's actual location.
+* **Adopting S3 native Lockfiles Over DynamoDB:** Rather than provisioning a separate AWS DynamoDB table solely to manage state lock records, this build takes advantage of modern Terraform backend capabilities by using `use_lockfile = true`. This leverage S3's native conditional-write locking, eliminating additional resource overhead while maintaining concurrent execution safeguards.
+
+* **Secrets Manager Retention Window:** Standard AWS Secrets Manager behavior holds deleted secrets in a 30-day recovery window. Setting `recovery_window_in_days = 0` was necessary to ensure that running `terraform destroy` completely purges secret material, allowing instant re-creation during iterative `terraform apply` test runs without dynamic naming collisions.
 
 
 ## Cost Considerations
