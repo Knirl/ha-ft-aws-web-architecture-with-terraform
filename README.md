@@ -129,12 +129,22 @@ Terraform resolves deletion order automatically from its dependency graph. `stat
 
 ## Roadmap: v2
 
-This build intentionally hardcodes values to focus on getting each service correct in Terraform. A planned refactor:
+Everything below is a list of improvements for this project to level up, next project will be the version 2.
 
-- Extract configuration into `variables.tf` / `terraform.tfvars`, including cost-conscious toggles (`enable_nat_gateway`, `rds_multi_az`) defaulting to the cheaper option
-- Break the configuration into reusable modules (`networking`, `compute`, `database`)
-- Add `outputs.tf` exposing the ALB DNS name and RDS endpoint
-- Commit a `terraform.tfvars.example` alongside the gitignored real `.tfvars`
-- Apply a consistent tagging strategy via `locals` or provider `default_tags`
-- Run `terraform fmt` / `terraform validate` as a pre-commit habit, plus a security scan (e.g. `tfsec`)
-- Optionally wire the S3 bucket into the actual request path, and add a basic CI/CD pipeline running `plan` on pull requests
+**Must-have:**
+- **`variables.tf` + `terraform.tfvars`** — Extract hardcoded parameters (CIDRs, instance sizes) into typed variables with strict input validation rules.
+- **Modules** — Reorganize flat files into `modules/` (`vpc`, `security`, `database`, `compute`, `alb`, `observability`). Decouple ASG and ALB using `aws_autoscaling_attachment`.
+- **Cost-toggle variables** — Add boolean toggles (`enable_nat_gateway`, `rds_multi_az`) defaulting to `false`/single-AZ to control dev environment costs.
+- **Dynamic scaling safeguard** — Add `lifecycle { ignore_changes = [desired_capacity] }` to ASG to prevent Terraform from resetting CloudWatch scaling actions.
+- **`outputs.tf`** — Export ALB DNS name, RDS connection endpoint (sans credentials), and VPC IDs after apply.
+- **`terraform.tfvars.example`** — Commit a dummy variable template while gitignoring the actual `.tfvars`.
+- **Tagging strategy** — Standardize global tags via `default_tags`, pass instance tags in Launch Template `tag_specifications`, and add `kubernetes.io/role/*` tags to subnets.
+- **Hypervisor-level IMDSv2** — Enforce `http_tokens = "required"` in Launch Template `metadata_options` to disable IMDSv1 fallbacks globally, building on v1's script-level compliance.
+- **KMS & Secrets Management** — Use a Customer Managed Key (`aws_kms_key`) for RDS/Secrets Manager and set `recovery_window_in_days = 0` on dev secrets for fast test teardowns.
+- **Code hygiene** — Run `terraform fmt -recursive` and `terraform validate` prior to every commit.
+
+**Strong nice-to-have:**
+- **Local security scanning** — Run `tfsec` or `checkov` locally before committing and document findings in the README.
+
+**Optional stretch:**
+- **Functional S3 integration** — Attach an IAM Instance Profile to EC2 so User Data dynamically fetches app assets (`aws s3 cp`) from the private S3 bucket on boot.
