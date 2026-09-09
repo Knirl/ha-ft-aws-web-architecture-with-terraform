@@ -7,6 +7,7 @@ A Terraform reimplementation of [Project 1: Highly Available, Fault-Tolerant AWS
 ## Table of Contents
 
 - [Architecture](#architecture)
+- [What this project intentionally does NOT include yet](#what-this-project-does-not-include-yet)
 - [What Changed, Building This in Terraform](#what-changed-building-this-in-terraform)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
@@ -26,6 +27,11 @@ Unchanged from Project 1:
 ![Architecture Diagram](./project1-architecture-diagram.png)
 
 Security model, also unchanged: `Internet → alb-sg (0.0.0.0/0:80) → ec2-sg (from alb-sg only:80) → rds-sg (from ec2-sg only:3306)`.
+
+## What this project intentionally does NOT include yet
+
+Before the step-by-step summary, it's important to be explicit about this: **v1 uses no variables, no `variables.tf`, no `outputs.tf`, and no modules.** Every value (bucket names, CIDR blocks, instance types, region) is hardcoded directly into the resource blocks, and every resource lives in one flat folder (`project2/`) rather than being split into reusable modules. This was a deliberate choice, not an oversight — the goal of v1 was to learn and correctly implement each AWS service and Terraform concept without also juggling the added abstraction of variables/modules at the same time. Fixing this is the entire point of v2 (see the last section of this document).
+
 
 ## What Changed, Building This in Terraform
 
