@@ -138,7 +138,7 @@ Everything below is a list of improvements for this project to level up, next pr
 - **Dynamic scaling safeguard** — Add `lifecycle { ignore_changes = [desired_capacity] }` to ASG to prevent Terraform from resetting CloudWatch scaling actions.
 - **`outputs.tf`** — Export ALB DNS name, RDS connection endpoint (sans credentials), and VPC IDs after apply.
 - **`terraform.tfvars.example`** — Commit a dummy variable template while gitignoring the actual `.tfvars`.
-- **Tagging strategy** — Standardize global tags via `default_tags`, pass instance tags in Launch Template `tag_specifications`, and add `kubernetes.io/role/*` tags to subnets.
+- **Tagging strategy** — Standardize global tags via default_tags, pass instance tags in Launch Template tag_specifications, and implement consistent resource tagging across all modules.
 - **Hypervisor-level IMDSv2** — Enforce `http_tokens = "required"` in Launch Template `metadata_options` to disable IMDSv1 fallbacks globally, building on v1's script-level compliance.
 - **KMS & Secrets Management** — Use a Customer Managed Key (`aws_kms_key`) for RDS/Secrets Manager and set `recovery_window_in_days = 0` on dev secrets for fast test teardowns.
 - **Code hygiene** — Run `terraform fmt -recursive` and `terraform validate` prior to every commit.
